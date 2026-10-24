@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 outcomes=[1,-1]
 
 #Amount of money the Gambler is aiming to win
-goal=9
+goal=9 #change at will
 
 #Amount of money the Gambler starts with
-balance=5
+balance=5 #change at will
 
 series=[balance]
 
