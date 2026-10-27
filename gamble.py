@@ -1,46 +1,71 @@
 import random
+import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 
-#Possible outcomes for the simple symmetric gamblers ruin problem
-outcomes=[1,-1]
-
 #Amount of money the Gambler is aiming to win
-goal=9 #change at will
+goal=12
 
 #Amount of money the Gambler starts with
-balance=5 #change at will
+balance=3
 
-series=[balance]
+#Possible outcomes for each bet (entries must be either 1 or -1)
+outcomes=[1,1,1,1,1,-1,-1,-1,-1]
+num=(sum(outcomes)+len(outcomes))/2
 
-#Simulation of the Gamblers bets
+#Probability of success for each individual bet
+p=num/len(outcomes)
+
+#Probability of failure for each individual bet
+q=1-p
+
+#Ratio between the probability of failure and probability of success
+r=q/p
+
+#Calculation for the overall probability of success
+if sum(outcomes)==0:
+    P_success=balance/goal
+else:
+    P_success=(1-r**balance)/(1-r**goal)
+
+
+#Calculation for the total number of bets before success or ruin
+if sum(outcomes)==0:
+    E_bets=balance*(goal-balance)
+else:
+    E_bets=np.abs(1/(q-p)*(goal-balance*((1-r**balance)/(1-r**goal))))
+E_bets=round(E_bets)
+
+#Simulation of the Gambler's bets
 def Gambler(balance,goal):
+    series=[balance]
     while balance<goal and balance>0:
         result=random.choice(outcomes)
         balance+=result
         series.append(balance)
     return series
 
-Gambler(balance,goal)
+results=Gambler(balance,goal)
+length=len(results)
 
-#Number of bets made by the Gambler
-bets=[]
-for i in range(0,len(series)):
-    bets.append(i)
+#X-axis intervals
+step=np.ceil(length/30)
 
-#Colour indicating whether the Gambler reached his goal or not
-if series[-1]==goal:
+#Visual indicator of Gambler's final result
+if results[-1]==goal:
     line_colour='g'
 else:
     line_colour='r'
 
-#Probability of the Gambler reaching his goal 
-p_success=round(balance/goal,2)
-print('Probability of success: ',p_success)
+print(f'Probability of success: {P_success}')
+print(f'Expected number of bets: {E_bets}')
+print(f'Actual number of bets: {length-1}')
 
-#Graph of how the Gambler fared on his bets
-plt.title("Gambler's ruin")
-plt.xlabel('Number of bets made by Gambler')
-plt.ylabel('Money held by Gambler (£)')
-plt.plot(bets,series,color=line_colour)
-plt.grid(True)
+plt.figure(figsize=(12,6))
+plt.xticks(np.arange(0,step+length,step))
+plt.yticks(np.arange(0,1+goal,1))
+plt.title("Finite Gambler's Ruin")
+plt.xlabel('Number of bets')
+plt.ylabel("Gambler's balance")
+sns.lineplot(results,color=line_colour)
 plt.show()
