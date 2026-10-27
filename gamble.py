@@ -48,6 +48,9 @@ def Gambler(balance,goal):
 results=Gambler(balance,goal)
 length=len(results)
 
+#Difference between the number of bets expected and actually observed
+dev=np.abs(E_bets-length+1)
+
 #X-axis intervals
 step=np.ceil(length/30)
 
@@ -60,6 +63,7 @@ else:
 print(f'Probability of success: {P_success}')
 print(f'Expected number of bets: {E_bets}')
 print(f'Actual number of bets: {length-1}')
+print(f'Deviation between expected and actual number of bets: {dev}')
 
 plt.figure(figsize=(12,6))
 plt.xticks(np.arange(0,step+length,step))
