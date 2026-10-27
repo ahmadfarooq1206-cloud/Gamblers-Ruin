@@ -1,4 +1,6 @@
 Required modules:
 
+numpy: https://pypi.org/project/numpy/
 matplotlib: https://pypi.org/project/matplotlib/
 random: Part of the Python standard library
+seaborn: https://pypi.org/project/seaborn/
