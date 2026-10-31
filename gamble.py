@@ -3,73 +3,78 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-#Amount of money the Gambler is aiming to win
-goal=12
-
-#Amount of money the Gambler starts with
-balance=3
-
-#Possible outcomes for each bet (entries must be either 1 or -1)
-outcomes=[1,1,1,1,1,-1,-1,-1,-1]
-num=(sum(outcomes)+len(outcomes))/2
-
-#Probability of success for each individual bet
-p=num/len(outcomes)
-
-#Probability of failure for each individual bet
+# Obtains the Gambler's starting balance, end goal and individual probability of success
+while True:
+    try:
+        print('')
+        balance=int(input("Enter the Gambler's starting balance: £"))
+        goal=int(input("Enter the Gambler's goal: £"))
+        p=float(input("Enter the probability of success for each gamble as a decimal: "))
+        if goal>balance and 0<p<1:
+            break
+        else:
+            pass
+    except ValueError:
+        pass
+# Probability of failure for each individual gamble
 q=1-p
-
-#Ratio between the probability of failure and probability of success
+# Ratio between the probabilities for failure and success
 r=q/p
 
-#Calculation for the overall probability of success
-if sum(outcomes)==0:
+# Formulas for the overall probability of success and expected number of gambles
+if p==.5:
     P_success=balance/goal
+    E_gambles=balance*(goal-balance)
 else:
     P_success=(1-r**balance)/(1-r**goal)
+    E_gambles=1/(q-p)*(balance-goal*((1-r**balance)/(1-r**goal)))
+E_gambles=round(E_gambles)
 
+# List of numbers used to determine whether each gamble is succesful
+x=np.linspace(0,1,10000001)
 
-#Calculation for the total number of bets before success or ruin
-if sum(outcomes)==0:
-    E_bets=balance*(goal-balance)
-else:
-    E_bets=np.abs(1/(q-p)*(goal-balance*((1-r**balance)/(1-r**goal))))
-E_bets=round(E_bets)
-
-#Simulation of the Gambler's bets
-def Gambler(balance,goal):
-    series=[balance]
+# Simulation of the Gambler's actions
+def Gambler(balance,goal,p):
+    account=[balance]
     while balance<goal and balance>0:
-        result=random.choice(outcomes)
-        balance+=result
-        series.append(balance)
-    return series
+        if p>random.choice(x):
+            balance+=1
+        else:
+            balance-=1
+        account.append(balance)
+    return account
+result=Gambler(balance,goal,p)
 
-results=Gambler(balance,goal)
-length=len(results)
+# Deviation between the expected and observed number of gambles made
+gambles=len(result)-1
+deviation=np.abs(E_gambles-gambles)
 
-#Difference between the number of bets expected and actually observed
-dev=np.abs(E_bets-length+1)
+# X-axis scale
+x_step=np.ceil(gambles/20)
 
-#X-axis intervals
-step=np.ceil(length/30)
+# Y-axis scale
+y_step=np.ceil((max(result)-min(result))/20)
 
-#Visual indicator of Gambler's final result
-if results[-1]==goal:
+P_success=100*P_success
+
+# Insights from simulation
+print(f'\nProbability of success: {P_success} %')
+print(f'Expected number of gambles: {E_gambles}')
+print(f'Observed number of gambles: {gambles}')
+print(f'Deviation between expectation and observation: {deviation}\n')
+
+# Visual indicator of Gamblers final result
+if result[-1]==goal:
     line_colour='g'
 else:
     line_colour='r'
 
-print(f'Probability of success: {P_success}')
-print(f'Expected number of bets: {E_bets}')
-print(f'Actual number of bets: {length-1}')
-print(f'Deviation between expected and actual number of bets: {dev}')
-
-plt.figure(figsize=(12,6))
-plt.xticks(np.arange(0,step+length,step))
-plt.yticks(np.arange(0,1+goal,1))
-plt.title("Finite Gambler's Ruin")
-plt.xlabel('Number of bets')
-plt.ylabel("Gambler's balance")
-sns.lineplot(results,color=line_colour)
+# Visualisation of the Gambler's actions
+plt.figure(figsize=(11,6))
+plt.xticks(np.arange(0,x_step+gambles,x_step))
+plt.yticks(np.arange(0,y_step+goal,y_step))
+plt.title("Gambler's Ruin")
+plt.xlabel('Number of gambles made')
+plt.ylabel("Gambler's balance (£)")
+sns.lineplot(result,color=line_colour)
 plt.show()
