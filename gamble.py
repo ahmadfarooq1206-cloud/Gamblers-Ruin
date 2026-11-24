@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Obtains the Gambler's starting balance, end goal and individual probability of success
+# Obtains the Gambler's starting balance, end goal and probability of success for each gamble
 while True:
     try:
         print('')
@@ -16,7 +16,7 @@ while True:
             pass
     except ValueError:
         pass
-# Probability of failure for each individual gamble
+# Probability of failure for each gamble
 q=1-p
 # Ratio between the probabilities for failure and success
 r=q/p
@@ -28,7 +28,9 @@ if p==.5:
 else:
     P_success=(1-r**balance)/(1-r**goal)
     E_gambles=1/(q-p)*(balance-goal*((1-r**balance)/(1-r**goal)))
+
 E_gambles=round(E_gambles)
+P_success=100*P_success
 
 # List of numbers used to determine whether each gamble is succesful
 x=np.linspace(0,1,10000001)
@@ -43,38 +45,24 @@ def Gambler(balance,goal,p):
             balance-=1
         account.append(balance)
     return account
-result=Gambler(balance,goal,p)
-
-# Deviation between the expected and observed number of gambles made
-gambles=len(result)-1
-deviation=np.abs(E_gambles-gambles)
-
-# X-axis scale
-x_step=np.ceil(gambles/20)
-
-# Y-axis scale
-y_step=np.ceil((max(result)-min(result))/20)
-
-P_success=100*P_success
 
 # Insights from simulation
 print(f'\nProbability of success: {P_success} %')
-print(f'Expected number of gambles: {E_gambles}')
-print(f'Observed number of gambles: {gambles}')
-print(f'Deviation between expectation and observation: {deviation}\n')
+print(f'Expected number of gambles: {E_gambles}\n')
 
-# Visual indicator of Gamblers final result
-if result[-1]==goal:
-    line_colour='g'
-else:
-    line_colour='r'
-
-# Visualisation of the Gambler's actions
-plt.figure(figsize=(11,6))
-plt.xticks(np.arange(0,x_step+gambles,x_step))
-plt.yticks(np.arange(0,y_step+goal,y_step))
+plt.figure(figsize=(13,6))
 plt.title("Gambler's Ruin")
 plt.xlabel('Number of gambles made')
 plt.ylabel("Gambler's balance (£)")
-sns.lineplot(result,color=line_colour)
+
+# List of simulation results
+pathways=[]
+for i in range(50):
+    pathways.append(Gambler(balance,goal,p))
+
+# Plot
+for i in pathways:
+    sns.lineplot(i)
+
+plt.grid()
 plt.show()
